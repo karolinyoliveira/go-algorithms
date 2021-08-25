@@ -1,8 +1,7 @@
 package main
 
-// topsort produces a listing of the vertices for all edges 'a->b', meaning 'a' comes before 'b' in the listing.
+// Topsort produces a listing of the vertices for all edges 'a->b', meaning 'a' comes before 'b' in the listing.
 import (
-	"container/list"
 	"fmt"
 )
 
@@ -61,7 +60,6 @@ func (g *Graph) DFS() []interface{} {
 	for vertex := range g.AdjList {
 		if g.DependencyDegree(vertex) == 0 {
 			out := g.DFSRec(vertex, visited)
-			fmt.Println("Out generate by", vertex, "is", out)
 			sorted = append(sorted, out)
 		}
 	}
@@ -72,39 +70,39 @@ func (g *Graph) TopSort() []interface{} {
 	return reverse(g.DFS())
 }
 
-func (g *Graph) TopSort_Kahn() []interface{} { //By degree
-	var sorted []interface{}
+func (g *Graph) TopSort_Kahn() [][]interface{} { //Group by level
+	levels := make([][]interface{}, 0)
 	degrees := make(map[interface{}]int)
-	queue := list.New()
-	//Get degree of every vertex
+	queue := make([]interface{}, 0)
+
 	for v := range g.AdjList {
 		degrees[v] = g.DependencyDegree(v)
 	}
 
 	for v := range g.AdjList {
 		if degrees[v] == 0 {
-			queue.PushBack(v)
-
+			queue = append(queue, v)
 		}
 	}
-	fmt.Println("queue:", queue)
-	fmt.Println("degrees:", degrees)
-	for queue.Len() > 0 {
-		currVertex := queue.Front()
-		queue.Remove(currVertex)
-		sorted = append(sorted, currVertex.Value)
 
-		for _, child := range g.AdjList[currVertex.Value] {
-			fmt.Println("childs:", g.AdjList[currVertex.Value], "of", currVertex.Value)
-			degrees[child]--
+	for len(queue) > 0 {
+		var currLevel []interface{}
 
-			if degrees[child] == 0 {
-				queue.PushBack(child)
+		currLevel = append(currLevel, queue...)
+		levels = append(levels, currLevel)
+		queue = []interface{}{}
+
+		for _, rmv := range currLevel {
+			for _, child := range g.AdjList[rmv] {
+				degrees[child]--
+
+				if degrees[child] == 0 {
+					queue = append(queue, child)
+				}
 			}
 		}
 	}
-
-	return sorted
+	return levels
 }
 
 func reverse(vec []interface{}) []interface{} {
@@ -117,23 +115,6 @@ func reverse(vec []interface{}) []interface{} {
 	}
 
 	return reversed
-}
-
-func remove(el interface{}, slice []interface{}) []interface{} {
-	for i, v := range slice {
-		if el == v {
-			slice[i] = slice[len(slice)-1]
-			return slice[:len(slice)-1]
-		}
-	}
-
-	aux := slice[0]
-	if len(slice) == 2 {
-		slice = make([]interface{}, 0)
-		slice = append(slice, aux)
-	}
-	fmt.Println(len(slice))
-	return slice
 }
 
 func (g *Graph) EdgeExists(src interface{}, dst interface{}) bool {
@@ -171,5 +152,5 @@ func main() {
 
 	G.AddEdge("spellchecker", "dish_syn")
 
-	fmt.Println(G.TopSort_Kahn()) // [context spellchecker dish_syn] ou [spellchecker context dish_syn]
+	fmt.Println(G.TopSort_Kahn()) // [[spellchecker context] dish_syn]]
 }

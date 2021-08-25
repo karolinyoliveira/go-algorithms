@@ -31,7 +31,6 @@ func (t *Trie) InsertWord(word string) {
 		currNode = currNode.children[letterIndex]
 	}
 	currNode.isEnd = true
-	fmt.Println(word + " inserted")
 }
 
 func (t *Trie) RemoveWord(word string) {
@@ -45,7 +44,6 @@ func (t *Trie) RemoveWord(word string) {
 		currNode = currNode.children[letterIndex]
 	}
 	if currNode.isEnd {
-		fmt.Println(word + " removed")
 		currNode.isEnd = false
 	}
 }
@@ -63,10 +61,12 @@ func (t *Trie) SearchWord(word string) bool {
 }
 
 func main() {
-	words := InitTrie()
-	words.InsertWord("hello")
-	words.InsertWord("gopher gopher")
-	fmt.Println(words.SearchWord("gopher"))
-	words.RemoveWord("hello")
-	fmt.Println(words.SearchWord("hello gopher"))
+	dict := InitTrie()
+	dict.InsertWord("hello")
+	dict.InsertWord("gopher")
+	fmt.Println("Search for gopher returned", dict.SearchWord("gopher")) //true
+
+	dict.InsertWord("go")
+	dict.RemoveWord("gopher")
+	fmt.Println("Search for gopher returned", dict.SearchWord("gopher")) //false
 }
